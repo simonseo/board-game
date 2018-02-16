@@ -161,7 +161,8 @@ recognizes the following commands:
 Command | Description
 --- | ---
 clean   | Removes extraneous directories; most notably, existing class files. Use this command if Java's giving you strange errors.
-compile | Compiles all Java files under `src`.
+compile | Compiles all Java files under src, except the unit tests.
+compile-tests | Compiles files in `impl.game` and `test.unit`.
 test    | Engages JUnit to run the unit tests.
 console | Runs the full game.
 
