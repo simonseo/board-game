@@ -93,7 +93,7 @@ board. It should be clear which player occupies a given cell.
 
 ## Expectations
 
-### View (40 points)
+### View (30 points)
 
 The view must accurately update the visualization of the board and
 give players turns. The system test takes care of announcing the end
@@ -111,6 +111,13 @@ this!
 
 No points will awarded for code that fails to compile during the
 testing phase.
+
+### Practices (10 points)
+
+We continue to expect "good general habits" and good "usage of
+GitHub." Please see the [previous
+homework](https://github.abudhabi.nyu.edu/jsw7/blackjack/tree/hw1#grading)
+for what this entails.
 
 ## Testing
 
