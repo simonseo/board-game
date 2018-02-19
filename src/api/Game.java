@@ -29,9 +29,9 @@ public abstract class Game extends Observable {
 
     /**
      * @throws GameStateException if the game is over.
-     * @throws GameIndexOutOfBoundsException if the move is
-     *         out-of-bounds or is to a column that is not legal
-     *         according to the rules of the concrete game
+     * @throws GameIndexOutOfBoundsException if the requested row or
+     *         column is out-of-bounds according the rules/semantics
+     *         of the concrete implementation of the game.
      **/
     public abstract void placeChip(int row, int col) throws GameStateException;
 
