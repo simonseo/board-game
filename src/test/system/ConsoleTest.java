@@ -7,7 +7,7 @@ import exc.GameStateException;
 import impl.view.Console;
 import impl.game.ConnectFour;
 
-public class ConnectFourConsoleTest {
+public class ConsoleTest {
     public static void main(String[] args) {
         Game game = new ConnectFour();
         View view = new Console(game);
