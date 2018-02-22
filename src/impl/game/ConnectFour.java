@@ -33,6 +33,7 @@ public class ConnectFour extends Game {
 		 * 2. place
 		 * 3. check win
 		 * 4. 
+		 * 
 		 */
 		assert !this.isGameOver();
 		
