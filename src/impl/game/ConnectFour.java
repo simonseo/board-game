@@ -1,5 +1,7 @@
 package impl.game;
 
+import java.util.Random;
+
 import api.Chip;
 import api.Game;
 import exc.GameIndexOutOfBoundsException;
@@ -10,13 +12,18 @@ public class ConnectFour extends Game {
 	private Chip[][] board;
 	private Chip currentPlayer;
 	private Chip winner;
+	private boolean gameIsOver;
 	
 	
 	public ConnectFour() {
+		/*
+		 * Constructor initiates variables to the first 
+		 */
 		this.rows = 5;
 		this.columns = 6;
-		this.currentPlayer = Chip.BLUE;
+		this.currentPlayer = new Chip[]{Chip.BLUE, Chip.RED}[new Random().nextInt(2)];
 		this.winner = null;
+		this.gameIsOver = false;
 		this.board = new Chip[this.rows][this.columns];
 		for (int i = 0; i < this.rows; i++) {
 			for (int j = 0; j < this.columns; j++) {
@@ -30,11 +37,13 @@ public class ConnectFour extends Game {
 		/*
 		 * Called by update function in Console
 		 * 1. ask for user input
-		 * 2. place
-		 * 3. check win
+		 * 2. place (check win, 
 		 * 4. 
 		 */
 		assert !this.isGameOver();
+		
+		//do stuff
+		
 		
 		if (!this.isGameOver()) {
 			this.notifyObservers("player so and so");
@@ -74,18 +83,62 @@ public class ConnectFour extends Game {
 		if (this.isGameOver()) {
 			throw new GameStateException();
 		}
-		if (row < 0 || row > this.getRows()-1 ||
-				col < 0 || col > this.getRows()-1) {
+		if (row != 0 || col < 0 || col > this.getRows()-1) {
 			throw new GameIndexOutOfBoundsException(row, col);
 		}
-		// TODO Find placeable row 
-		board[row][col] = this.getCurrentPlayer();
+		if ((row = this.getPlaceableRow(col)) < 0) {
+			// If column is full
+			throw new GameIndexOutOfBoundsException(row, col);
+		};
+
+		Chip p = this.getCurrentPlayer();
+		board[row][col] = p;
+		if (this.checkWin(p)) {
+			this.winner = p;
+			this.gameIsOver = true;
+		} else if (this.boardIsFull()) {
+			this.winner = Chip.EMPTY;
+			this.gameIsOver = true;
+		}
 		this.switchPlayer();
 	}
-	
 
+	private boolean boardIsFull() {
+		/*
+		 * Checks if board is full (true) or has any empty space (false)
+		 */
+		for (int col = 0; col < this.getColumns(); col++) {
+			if (this.getPlaceableRow(col) >= 0) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private int getPlaceableRow(int col) {
+		/*
+		 * Returns the lowest row that is empty for given column 
+		 * assumes that col is within bounds
+		 */
+		assert col >= 0 && col < this.getColumns();
+		for (int row = this.getRows() - 1; row >= 0; row--) {
+			if (this.getChip(row, col).equals(Chip.EMPTY)) {
+				return row;
+			}
+		}
+		return -1;
+	}
+
+	private boolean checkWin(Chip p) {
+		// Awesome for-loops -- can we call all logic algorithm? -- that checks if player wins 
+		return false;
+	}
 
 	private void switchPlayer() {
+		/*
+		 * Change the currentPlayer to the other player
+		 * If game is over, set it to empty
+		 */
 		assert this.currentPlayer != null;
 		this.currentPlayer = (this.isGameOver()) ? Chip.EMPTY :
 			(this.currentPlayer.equals(Chip.BLUE)) ? Chip.RED : Chip.BLUE;
@@ -93,7 +146,12 @@ public class ConnectFour extends Game {
 
 	@Override
 	public Chip getWinningPlayer() throws GameStateException {
-		if (this.isGameOver() || this.winner == null || this.winner.equals(Chip.EMPTY)) {
+		/*
+		 * getter function for winner. expects that the game is over. 
+		 * If there is no winner, throw an exception
+		 * winner is set in placeChip
+		 */
+		if (!this.isGameOver() || this.winner == null || this.winner.equals(Chip.EMPTY)) {
 			throw new GameStateException();
 		}
 		return this.winner;
@@ -107,9 +165,12 @@ public class ConnectFour extends Game {
 
 	@Override
 	public boolean isGameOver() {
-		// TODO figure out game flow
-		// The game is over if it is a tie or a winner has been determined.
-		return false;
+		/*
+		 * getter function for gameIsOver
+		 * gameIsOver is set in placeChip
+		 * The game is over if it is a tie or a winner has been determined.
+		 */
+		return this.gameIsOver;
 	}
 	
 }
