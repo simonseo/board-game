@@ -1,6 +1,7 @@
 package impl.game;
 
 import java.util.Random;
+import java.util.Scanner;
 
 import api.Chip;
 import api.Game;
@@ -13,6 +14,7 @@ public class ConnectFour extends Game {
 	private Chip currentPlayer;
 	private Chip winner;
 	private boolean gameIsOver;
+	private Scanner scan;
 	
 	
 	public ConnectFour() {
@@ -30,6 +32,7 @@ public class ConnectFour extends Game {
 				board[i][j] = Chip.EMPTY;
 			}
 		}
+		this.scan = new Scanner(System.in);
 	}
 	
 	public void run() {
@@ -42,13 +45,19 @@ public class ConnectFour extends Game {
 		 */
 		assert !this.isGameOver();
 		
+		// player #'s turn! where do you wanna place it? scan
+		
+		// placechip - checks win, gameover, switches player
+		
+		// 
+		
 		//do stuff
 		
 		
 		if (!this.isGameOver()) {
-			this.notifyObservers("player so and so");
+			this.notifyObservers(PLAYER CHIP HERE CALL CURRENT PLAYER AGAIN);
 		} else {
-			this.notifyObservers("game over");
+			this.notifyObservers("Game Over");
 		}
 	}
 	
@@ -64,7 +73,39 @@ public class ConnectFour extends Game {
 	}
 
 	@Override
-	public Chip getChip(int row, int col) {
+	public Chip getCurrentPlayer() {
+		return this.currentPlayer; 
+	}
+
+	@Override
+	public Chip getWinningPlayer() throws GameStateException {
+		/*
+		 * getter function for winner. expects that the game is over. 
+		 * If there is no winner, throw an exception
+		 * winner is set in placeChip
+		 */
+		if (!this.isGameOver() || this.winner == null || this.winner.equals(Chip.EMPTY)) {
+			throw new GameStateException();
+		}
+		return this.winner;
+	}
+
+	private void switchPlayer() {
+		/*
+		 * Change the currentPlayer to the other player
+		 * If game is over, set it to empty
+		 * Doesn't assume, but should be the case that, currentPlayer is already empty or null
+		 */
+		assert this.currentPlayer != null;
+		assert !this.currentPlayer.equals(Chip.EMPTY);
+
+		this.currentPlayer = (this.isGameOver()) ? Chip.EMPTY :
+			(this.currentPlayer.equals(Chip.BLUE)) ? Chip.RED : Chip.BLUE;
+		this.setChanged();
+	}
+
+	@Override
+	public Chip getChip(int row, int col) throws GameIndexOutOfBoundsException {
 		if (row < 0 || row > this.getRows()-1 ||
 				col < 0 || col > this.getRows()-1) {
 			throw new GameIndexOutOfBoundsException(row, col);
@@ -96,23 +137,14 @@ public class ConnectFour extends Game {
 		if (this.checkWin(p)) {
 			this.winner = p;
 			this.gameIsOver = true;
+			this.setChanged();
 		} else if (this.boardIsFull()) {
 			this.winner = Chip.EMPTY;
 			this.gameIsOver = true;
+			this.setChanged();
 		}
 		this.switchPlayer();
-	}
-
-	private boolean boardIsFull() {
-		/*
-		 * Checks if board is full (true) or has any empty space (false)
-		 */
-		for (int col = 0; col < this.getColumns(); col++) {
-			if (this.getPlaceableRow(col) >= 0) {
-				return false;
-			}
-		}
-		return true;
+		
 	}
 
 	private int getPlaceableRow(int col) {
@@ -134,33 +166,16 @@ public class ConnectFour extends Game {
 		return false;
 	}
 
-	private void switchPlayer() {
+	private boolean boardIsFull() {
 		/*
-		 * Change the currentPlayer to the other player
-		 * If game is over, set it to empty
+		 * Checks if board is full (true) or has any empty space (false)
 		 */
-		assert this.currentPlayer != null;
-		this.currentPlayer = (this.isGameOver()) ? Chip.EMPTY :
-			(this.currentPlayer.equals(Chip.BLUE)) ? Chip.RED : Chip.BLUE;
-	}
-
-	@Override
-	public Chip getWinningPlayer() throws GameStateException {
-		/*
-		 * getter function for winner. expects that the game is over. 
-		 * If there is no winner, throw an exception
-		 * winner is set in placeChip
-		 */
-		if (!this.isGameOver() || this.winner == null || this.winner.equals(Chip.EMPTY)) {
-			throw new GameStateException();
+		for (int col = 0; col < this.getColumns(); col++) {
+			if (this.getPlaceableRow(col) >= 0) {
+				return false;
+			}
 		}
-		return this.winner;
-	}
-
-	
-	@Override
-	public Chip getCurrentPlayer() {
-		return this.currentPlayer; 
+		return true;
 	}
 
 	@Override
@@ -174,3 +189,7 @@ public class ConnectFour extends Game {
 	}
 	
 }
+
+
+
+
