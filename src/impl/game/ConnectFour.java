@@ -168,15 +168,15 @@ public class ConnectFour extends Game {
 		return -1;
 	}
 
-	private boolean checkWin(Chip p, int R, int C) {
+	private boolean checkWin(Chip p, int row, int col) {
 		// Awesome for-loops -- can we call all logic algorithm? -- that checks if player wins
 		// Be sure to check out my diagonal check. It's beautiful.
 		int connect;
 
 		//Horizontal check
-		connect = 0;
 		for (int c = 0; c < this.getColumns(); c++) {
-			if (this.getChip(R, c).equals(p)) {
+			connect = 0;
+			if (this.getChip(row, c).equals(p)) {
 				connect++;
 				if (connect >= this.CONNECT) {
 					return true;
@@ -187,9 +187,9 @@ public class ConnectFour extends Game {
 		}
 		
 		//Vertical check	
-		connect = 0;
 		for (int r = 0; r < this.getRows(); r++) {
-			if (this.getChip(r, C).equals(p)) {
+			connect = 0;
+			if (this.getChip(r, col).equals(p)) {
 				connect++;
 				if (connect >= this.CONNECT) {
 					return true;
@@ -199,19 +199,23 @@ public class ConnectFour extends Game {
 			}
 		}
 		
-
-		int 	D = R + C - 1; // total umber of diagonals
-		assert D == 10;
-		int X; // X of starting point of diagonal
-		int Y; // Y of starting point of diagonal
-		int n; // Number of elements in/Length of diagonal
+		
+		int R = this.getRows(); // number of rows
+		int C = this.getColumns(); // number of columns
+		int 	D = R + C - 1; // total number of diagonals
+		int X; // X of starting point of each diagonal
+		int Y; // Y of starting point of each diagonal
+		int n; // Number of elements in/Length of each diagonal
 
 		//Main diagonal check
-		connect = 0;
-		for (int d = 0; d < D; d++) {
+		for (int d = 0; d < D; d++) { //number all the diagonals
+			connect = 0;
 			X = Math.max(0, R-(d+1));
 			Y = Math.max(0, (d+1)-R);
 			n = Math.min(Math.max(R, C), Math.min(d, D-d));
+			if (n < this.CONNECT) {
+				continue;
+			}
 			for (int i = 0; i < n; i++) {
 				if (this.getChip(X+i, Y+i).equals(p)) {
 					connect++;
@@ -225,11 +229,14 @@ public class ConnectFour extends Game {
 		}
 		
 		// Reverse diagonal check
-		connect = 0;
 		for (int d = 0; d < D; d++) {
+			connect = 0;
 			X = Math.max(0, R-(d+1));
 			Y = (C-1) - Math.max(0, (d+1)-R);
 			n = Math.min(Math.max(R, C), Math.min(d, D-d));
+			if (n < this.CONNECT) {
+				continue;
+			}
 			for (int i = 0; i < n; i++) {
 				if (this.getChip(X+i, Y-i).equals(p)) {
 					connect++;
