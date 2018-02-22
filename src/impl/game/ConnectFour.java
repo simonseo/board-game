@@ -1,5 +1,6 @@
 package impl.game;
 
+import java.util.InputMismatchException;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -47,10 +48,14 @@ public class ConnectFour extends Game {
 		String ps = (p.equals(Chip.BLUE)) ? "Blue" : 
 					(p.equals(Chip.RED)) ? "Red" : "Empty";
 		System.out.println("It is " + ps + " Player's turn. Choose a column: ");
-		int col = scan.nextInt();
 		
 		try {
+			int col = scan.nextInt();
 			this.placeChip(0, col);
+		} catch (InputMismatchException e) {
+			System.out.println("Error: Wrong type of input");
+			this.scan.skip("[^0-9]");
+			e.printStackTrace();
 		} catch (GameIndexOutOfBoundsException | GameStateException e) {
 			e.printStackTrace();
 		}
@@ -171,66 +176,56 @@ public class ConnectFour extends Game {
 	private boolean checkWin(Chip p, int row, int col) {
 		// Awesome for-loops -- can we call all logic algorithm? -- that checks if player wins
 		// Be sure to check out my diagonal check. It's beautiful.
-		int connect;
+//		int count;
 
 		//Horizontal check
 		for (int c = 0; c < this.getColumns(); c++) {
-			connect = 0;
+			int count = 0;
 			if (this.getChip(row, c).equals(p)) {
-				connect++;
-				if (connect >= this.CONNECT) {
+				count++;
+				if (count >= this.CONNECT) {
 					return true;
 				}
 			} else {
-				connect = 0;
+				count = 0;
 			}
 		}
 		
 		//Vertical check	
 		for (int r = 0; r < this.getRows(); r++) {
-			connect = 0;
+			int count = 0;
 			if (this.getChip(r, col).equals(p)) {
-				connect++;
-				if (connect >= this.CONNECT) {
+				count++;
+				if (count >= this.CONNECT) {
 					return true;
 				}
 			} else {
-				connect = 0;
+				count = 0;
 			}
 		}
 		
 		
 		int R = this.getRows(); // number of rows
 		int C = this.getColumns(); // number of columns
-		int 	D = R + C - 1; // total number of diagonals
+		int D = R + C - 1; // total number of diagonals
 		int X; // X of starting point of each diagonal
 		int Y; // Y of starting point of each diagonal
 		int n; // Number of elements in/Length of each diagonal
 
-		//Main diagonal check
-		for (int d = 0; d < D; d++) { //number all the diagonals
-			connect = 0;
+		//Main diagonal check for every diagonal d that has length > CONNECT
+		for (int d = this.CONNECT-1; d < D-(this.CONNECT-1); d++) { 
 			X = Math.max(0, R-(d+1));
 			Y = Math.max(0, (d+1)-R);
 			n = Math.min(Math.max(R, C), Math.min(d, D-d));
-			if (n < this.CONNECT) {
-				continue;
-			}
-			for (int i = 0; i < n; i++) {
-				if (this.getChip(X+i, Y+i).equals(p)) {
-					connect++;
-					if (connect >= this.CONNECT) {
-						return true;
-					}
-				} else {
-					connect = 0;
-				}
+			for (int i = 0, count = 0; i < n; i++) {
+				count = (this.getChip(X+i, Y+i).equals(p)) ? count+1 : 0;
+				if (count >= this.CONNECT) return true;
 			}
 		}
 		
 		// Reverse diagonal check
 		for (int d = 0; d < D; d++) {
-			connect = 0;
+			int count = 0;
 			X = Math.max(0, R-(d+1));
 			Y = (C-1) - Math.max(0, (d+1)-R);
 			n = Math.min(Math.max(R, C), Math.min(d, D-d));
@@ -239,12 +234,12 @@ public class ConnectFour extends Game {
 			}
 			for (int i = 0; i < n; i++) {
 				if (this.getChip(X+i, Y-i).equals(p)) {
-					connect++;
-					if (connect >= this.CONNECT) {
+					count++;
+					if (count >= this.CONNECT) {
 						return true;
 					}
 				} else {
-					connect = 0;
+					count = 0;
 				}
 			}
 		}

@@ -93,6 +93,10 @@ public class Console extends View {
 		 */
 		int r = game.getRows();
 		int c = game.getColumns();
+		for (int j = 0; j < c; j++) {
+			System.out.print(" "+j);
+		}
+		System.out.println();
 		for (int i = 0; i < r; i++) {
 			this.printHorizontalRule(c);
 			for (int j = 0; j < c; j++) {
