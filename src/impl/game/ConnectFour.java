@@ -10,6 +10,7 @@ import exc.GameStateException;
 
 public class ConnectFour extends Game {
 	private int rows, columns;
+	private final int CONNECT = 4; // required to connect 4 in a row 
 	private Chip[][] board;
 	private Chip currentPlayer;
 	private Chip winner;
@@ -35,27 +36,28 @@ public class ConnectFour extends Game {
 		this.scan = new Scanner(System.in);
 	}
 	
-	public void run() {
-		// TODO figure out game flow
-		/*
-		 * Called by update function in Console
-		 * 1. ask for user input
-		 * 2. place (check win, 
-		 * 4. 
-		 */
+	public void start() {
+		this.round();
+	}
+	
+	public void round() {
 		assert !this.isGameOver();
 		
-		// player #'s turn! where do you wanna place it? scan
+		Chip p = this.getCurrentPlayer();
+		String ps = (p.equals(Chip.BLUE)) ? "Blue" : 
+					(p.equals(Chip.RED)) ? "Red" : "Empty";
+		System.out.println("It is " + ps + " Player's turn. Choose a column: ");
+		int col = scan.nextInt();
 		
-		// placechip - checks win, gameover, switches player
-		
-		// 
-		
-		//do stuff
-		
+		try {
+			this.placeChip(0, col);
+		} catch (GameIndexOutOfBoundsException | GameStateException e) {
+			e.printStackTrace();
+		}
 		
 		if (!this.isGameOver()) {
-			this.notifyObservers(PLAYER CHIP HERE CALL CURRENT PLAYER AGAIN);
+			this.notifyObservers("Next Round");
+			this.round();
 		} else {
 			this.notifyObservers("Game Over");
 		}
@@ -71,7 +73,7 @@ public class ConnectFour extends Game {
 	public int getColumns() {
 		return this.columns;
 	}
-
+	
 	@Override
 	public Chip getCurrentPlayer() {
 		return this.currentPlayer; 
@@ -85,6 +87,7 @@ public class ConnectFour extends Game {
 		 * winner is set in placeChip
 		 */
 		if (!this.isGameOver() || this.winner == null || this.winner.equals(Chip.EMPTY)) {
+			System.out.println("Error: winner does not exist");
 			throw new GameStateException();
 		}
 		return this.winner;
@@ -107,7 +110,8 @@ public class ConnectFour extends Game {
 	@Override
 	public Chip getChip(int row, int col) throws GameIndexOutOfBoundsException {
 		if (row < 0 || row > this.getRows()-1 ||
-				col < 0 || col > this.getRows()-1) {
+				col < 0 || col > this.getColumns()-1) {
+			System.out.println("Error: getChip is called on a non-existent row or col");
 			throw new GameIndexOutOfBoundsException(row, col);
 		}
 		return board[row][col];
@@ -122,19 +126,22 @@ public class ConnectFour extends Game {
 		 * while the lower right corner would correspond to row five, column six.
 		 */
 		if (this.isGameOver()) {
+			System.out.println("Error: placeChip is called after game is over");
 			throw new GameStateException();
 		}
-		if (row != 0 || col < 0 || col > this.getRows()-1) {
+		if (row != 0 || col < 0 || col > this.getColumns()-1) {
+			System.out.println("Error: placeChip was given row!=0 or non-existent column");
 			throw new GameIndexOutOfBoundsException(row, col);
 		}
 		if ((row = this.getPlaceableRow(col)) < 0) {
-			// If column is full
+			// Also finds bottom-most empty spot for given column and assign it to row
+			System.out.println("Error: placeChip was called but board was full");
 			throw new GameIndexOutOfBoundsException(row, col);
 		};
 
 		Chip p = this.getCurrentPlayer();
 		board[row][col] = p;
-		if (this.checkWin(p)) {
+		if (this.checkWin(p, row, col)) {
 			this.winner = p;
 			this.gameIsOver = true;
 			this.setChanged();
@@ -161,8 +168,80 @@ public class ConnectFour extends Game {
 		return -1;
 	}
 
-	private boolean checkWin(Chip p) {
-		// Awesome for-loops -- can we call all logic algorithm? -- that checks if player wins 
+	private boolean checkWin(Chip p, int R, int C) {
+		// Awesome for-loops -- can we call all logic algorithm? -- that checks if player wins
+		// Be sure to check out my diagonal check. It's beautiful.
+		int connect;
+
+		//Horizontal check
+		connect = 0;
+		for (int c = 0; c < this.getColumns(); c++) {
+			if (this.getChip(R, c).equals(p)) {
+				connect++;
+				if (connect >= this.CONNECT) {
+					return true;
+				}
+			} else {
+				connect = 0;
+			}
+		}
+		
+		//Vertical check	
+		connect = 0;
+		for (int r = 0; r < this.getRows(); r++) {
+			if (this.getChip(r, C).equals(p)) {
+				connect++;
+				if (connect >= this.CONNECT) {
+					return true;
+				}
+			} else {
+				connect = 0;
+			}
+		}
+		
+
+		int 	D = R + C - 1; // total umber of diagonals
+		assert D == 10;
+		int X; // X of starting point of diagonal
+		int Y; // Y of starting point of diagonal
+		int n; // Number of elements in/Length of diagonal
+
+		//Main diagonal check
+		connect = 0;
+		for (int d = 0; d < D; d++) {
+			X = Math.max(0, R-(d+1));
+			Y = Math.max(0, (d+1)-R);
+			n = Math.min(Math.max(R, C), Math.min(d, D-d));
+			for (int i = 0; i < n; i++) {
+				if (this.getChip(X+i, Y+i).equals(p)) {
+					connect++;
+					if (connect >= this.CONNECT) {
+						return true;
+					}
+				} else {
+					connect = 0;
+				}
+			}
+		}
+		
+		// Reverse diagonal check
+		connect = 0;
+		for (int d = 0; d < D; d++) {
+			X = Math.max(0, R-(d+1));
+			Y = (C-1) - Math.max(0, (d+1)-R);
+			n = Math.min(Math.max(R, C), Math.min(d, D-d));
+			for (int i = 0; i < n; i++) {
+				if (this.getChip(X+i, Y-i).equals(p)) {
+					connect++;
+					if (connect >= this.CONNECT) {
+						return true;
+					}
+				} else {
+					connect = 0;
+				}
+			}
+		}
+ 
 		return false;
 	}
 
