@@ -179,68 +179,44 @@ public class ConnectFour extends Game {
 //		int count;
 
 		//Horizontal check
-		for (int c = 0; c < this.getColumns(); c++) {
-			int count = 0;
-			if (this.getChip(row, c).equals(p)) {
-				count++;
-				if (count >= this.CONNECT) {
-					return true;
-				}
-			} else {
-				count = 0;
-			}
+		for (int c = 0, count = 0; c < this.getColumns(); c++) {
+			count = (this.getChip(row, c).equals(p)) ? count+1 : 0;
+			if (count >= this.CONNECT) return true;
 		}
 		
 		//Vertical check	
-		for (int r = 0; r < this.getRows(); r++) {
-			int count = 0;
-			if (this.getChip(r, col).equals(p)) {
-				count++;
-				if (count >= this.CONNECT) {
-					return true;
-				}
-			} else {
-				count = 0;
-			}
+		for (int r = 0, count = 0; r < this.getRows(); r++) {
+			count = (this.getChip(r, col).equals(p)) ? count+1 : 0;
+			if (count >= this.CONNECT) return true;
 		}
 		
 		
 		int R = this.getRows(); // number of rows
 		int C = this.getColumns(); // number of columns
 		int D = R + C - 1; // total number of diagonals
-		int X; // X of starting point of each diagonal
-		int Y; // Y of starting point of each diagonal
-		int n; // Number of elements in/Length of each diagonal
+		int X; // X (row, first index) of starting point of each diagonal
+		int Y; // Y (col, second index) of starting point of each diagonal
+		int n; // Number of elements in/length of each diagonal
 
 		//Main diagonal check for every diagonal d that has length > CONNECT
-		for (int d = this.CONNECT-1; d < D-(this.CONNECT-1); d++) { 
-			X = Math.max(0, R-(d+1));
-			Y = Math.max(0, (d+1)-R);
-			n = Math.min(Math.max(R, C), Math.min(d, D-d));
+		for (int d = this.CONNECT-1; d < D-(this.CONNECT-1); d++) { // first and last few diagonals aren't long enough
+			X = Math.max(0, R-(d+1)); // X is zero along the top row, R-(d+1) along the left col
+			Y = Math.max(0, (d+1)-R); // Y is (d+1)-R along the top row, zero along the left col
+			n = Math.min(Math.max(R, C), Math.min(d, D-d)); // length of diagonal 
 			for (int i = 0, count = 0; i < n; i++) {
-				count = (this.getChip(X+i, Y+i).equals(p)) ? count+1 : 0;
-				if (count >= this.CONNECT) return true;
+				count = (this.getChip(X+i, Y+i).equals(p)) ? count+1 : 0; // reset counter if we see something different
+				if (count >= this.CONNECT) return true; // stop as soon as we see the 4th one
 			}
 		}
 		
 		// Reverse diagonal check
-		for (int d = 0; d < D; d++) {
-			int count = 0;
+		for (int d = this.CONNECT-1; d < D-(this.CONNECT-1); d++) { 
 			X = Math.max(0, R-(d+1));
 			Y = (C-1) - Math.max(0, (d+1)-R);
 			n = Math.min(Math.max(R, C), Math.min(d, D-d));
-			if (n < this.CONNECT) {
-				continue;
-			}
-			for (int i = 0; i < n; i++) {
-				if (this.getChip(X+i, Y-i).equals(p)) {
-					count++;
-					if (count >= this.CONNECT) {
-						return true;
-					}
-				} else {
-					count = 0;
-				}
+			for (int i = 0, count = 0; i < n; i++) {
+				count = (this.getChip(X+i, Y-i).equals(p)) ? count+1 : 0;
+				if (count >= this.CONNECT) return true;
 			}
 		}
  
