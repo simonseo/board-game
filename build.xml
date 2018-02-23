@@ -53,6 +53,7 @@
     <java fork="true" classname="test.system.ConsoleTest">
       <jvmarg value="-enableassertions"/>
       <classpath refid="default_classpath"/>
+      <arg value="${game}"/>
     </java>
   </target>
 
