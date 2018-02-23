@@ -23,8 +23,8 @@ public class ConnectFour extends Game {
 		/*
 		 * Constructor initiates variables to the first 
 		 */
-		this.rows = 4;
-		this.columns = 10;
+		this.rows = 5;
+		this.columns = 6;
 		this.currentPlayer = new Chip[]{Chip.BLUE, Chip.RED}[new Random().nextInt(2)];
 		this.winner = null;
 		this.gameIsOver = false;
@@ -49,6 +49,7 @@ public class ConnectFour extends Game {
 					(p.equals(Chip.RED)) ? "Red" : "Empty";
 		System.out.println("It is " + ps + " Player's turn. Choose a column: ");
 		
+		// receive user input of their desire column and place chip in board
 		try {
 			int col = scan.nextInt();
 			this.placeChip(0, col);
@@ -60,11 +61,13 @@ public class ConnectFour extends Game {
 			e.printStackTrace();
 		}
 		
+		// check if game is over
 		if (!this.isGameOver()) {
 			this.notifyObservers("Next Round");
 			this.round();
 		} else {
 			this.notifyObservers("Game Over");
+			this.scan.close();
 		}
 	}
 	

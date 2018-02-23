@@ -85,6 +85,7 @@ public class Console extends View {
 		// It should be clear which player occupies a given cell.
 		/*
 		 * print the board
+		 *  0 1 2
 		 * +-+-+-+
 		 * |O| |X|
 		 * +-+-+-+
