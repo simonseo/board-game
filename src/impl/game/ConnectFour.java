@@ -23,8 +23,8 @@ public class ConnectFour extends Game {
 		/*
 		 * Constructor initiates variables to the first 
 		 */
-		this.rows = 5;
-		this.columns = 6;
+		this.rows = 6;
+		this.columns = 7;
 		this.currentPlayer = new Chip[]{Chip.BLUE, Chip.RED}[new Random().nextInt(2)];
 		this.winner = null;
 		this.gameIsOver = false;
@@ -61,7 +61,7 @@ public class ConnectFour extends Game {
 			e.printStackTrace();
 		}
 		
-		// check if game is over
+		// check if game is over. don't call round if game over
 		if (!this.isGameOver()) {
 			this.notifyObservers("Next Round");
 			this.round();
