@@ -206,7 +206,6 @@ public class ConnectFour extends Game {
 			X = Math.max(0, R-(d+1)); // X is zero along the top row, R-(d+1) along the left col
 			Y = Math.max(0, (d+1)-R); // Y is (d+1)-R along the top row, zero along the left col
 			n = Math.min(Math.min(R, C), Math.min(d+1, D-d)); // length of diagonal
-			System.out.println("X:"+X+" Y:"+Y+" n: "+n);
 			for (int i = 0, count = 0; i < n; i++) {
 				count = (this.getChip(X+i, Y+i).equals(p)) ? count+1 : 0; // reset counter if we see something different
 				if (count >= this.CONNECT) return true; // stop as soon as we see the 4th one
