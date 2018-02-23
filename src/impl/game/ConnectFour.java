@@ -23,8 +23,8 @@ public class ConnectFour extends Game {
 		/*
 		 * Constructor initiates variables to the first 
 		 */
-		this.rows = 5;
-		this.columns = 6;
+		this.rows = 4;
+		this.columns = 10;
 		this.currentPlayer = new Chip[]{Chip.BLUE, Chip.RED}[new Random().nextInt(2)];
 		this.winner = null;
 		this.gameIsOver = false;
@@ -202,7 +202,8 @@ public class ConnectFour extends Game {
 		for (int d = this.CONNECT-1; d < D-(this.CONNECT-1); d++) { // first and last few diagonals aren't long enough
 			X = Math.max(0, R-(d+1)); // X is zero along the top row, R-(d+1) along the left col
 			Y = Math.max(0, (d+1)-R); // Y is (d+1)-R along the top row, zero along the left col
-			n = Math.min(Math.max(R, C), Math.min(d, D-d)); // length of diagonal 
+			n = Math.min(Math.min(R, C), Math.min(d+1, D-d)); // length of diagonal
+			System.out.println("X:"+X+" Y:"+Y+" n: "+n);
 			for (int i = 0, count = 0; i < n; i++) {
 				count = (this.getChip(X+i, Y+i).equals(p)) ? count+1 : 0; // reset counter if we see something different
 				if (count >= this.CONNECT) return true; // stop as soon as we see the 4th one
@@ -213,7 +214,7 @@ public class ConnectFour extends Game {
 		for (int d = this.CONNECT-1; d < D-(this.CONNECT-1); d++) { 
 			X = Math.max(0, R-(d+1));
 			Y = (C-1) - Math.max(0, (d+1)-R);
-			n = Math.min(Math.max(R, C), Math.min(d, D-d));
+			n = Math.min(Math.min(R, C), Math.min(d+1, D-d));
 			for (int i = 0, count = 0; i < n; i++) {
 				count = (this.getChip(X+i, Y-i).equals(p)) ? count+1 : 0;
 				if (count >= this.CONNECT) return true;
