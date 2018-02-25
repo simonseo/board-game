@@ -3,13 +3,11 @@ package test.system;
 import api.View;
 import api.Game;
 import api.Chip;
-import api.Controller;
 import exc.GameStateException;
 import impl.view.Console;
 import impl.game.Complica;
 import impl.game.TicTacToe;
 import impl.game.ConnectFour;
-import impl.controller.GameController;
 
 import java.lang.IllegalArgumentException;
 
@@ -31,8 +29,7 @@ public class ConsoleTest {
             throw new IllegalArgumentException(args[0]);
         }
 
-        Controller controller = new GameController(game);
-        View view = new Console(game, controller);
+        View view = new Console(game);
 
         view.update(game);
         try {
