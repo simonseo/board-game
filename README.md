@@ -1,116 +1,139 @@
-# Homework 1: Connect Four
+# New Models
 
-The primary objective of this homework is to develop the game of
-[Connect Four](https://en.wikipedia.org/wiki/Connect_Four). This is a
-two-player game in which players take turns putting chips on a
-grid. Once a player has four chips in-a-row they win. See the game's
-original [television commercial](https://youtu.be/KN3nohBw_CE) for a
-visual summary.
+The objective of this assignment is to add two additional games to the
+framework.
 
-Aside from game development, this homework should get you comfortable
-with unit testing---you'll notice a JUnit file buried in the test
-package---and with the [observer design
-pattern](https://en.wikipedia.org/wiki/Observer_pattern).
+## Games
 
-## Classes
+### Complica
 
-Package | Class | Extends | Implements | Summary
- --- | --- | --- | --- | ---
-api  | View | | Observer | Handles game I/O.
-   | | Game | Observable | | Manages the internal game state.
-   | | Chip | | | Represents chips on a board (type contained with board cells).
-impl.game | ConnectFour | Game | | ConnectFour implementation of `Game`.
-impl.view | Console | View | | Game interaction through the console.
-exc | GameIndexOutOfBoundsException | IndexOutOfBoundsException | | Bad placement requests.
-  | | GameStateException | Exception | | Requests of the model that cannot be answered due to the state of the game.
+Complica is similar to Connect Four in that players attempt achieve
+four chips in a row vertically, horizontally, or diagonally. There are
+two major differences:
 
-Your job is to implement classes in `impl.game` and `impl.view` using
-the classes in API. You may also add files to `test.unit` if you like
-(more below). *Do not* alter files in any other package, or add files
-to any other package.
+1. Complica is played on a seven-row, four-column board; and
 
-## Behavioral Specification
+2. players are allowed to add chips to columns that are seemingly
+   full.
 
-### Game
+The second difference has major implications for what end-of-game
+means in Complica. In cases where the column is full, that column
+behaves like a queue: the first chip in, now at the bottom of the
+column, is pushed out; all other chips are lowered; and the new chip
+is placed at the top of the column.
 
-Connect Four is game involving two players played on a six-row,
-seven-column board. Initially, the board is empty. Players then take
-turns adding chips of their respective color to the board. Once four
-chips in-a-row have been made by a single player---horizontally,
-diagonally, or vertically---the game is over. If there are no empty
-cells on the board, the game is declared a tie.
+This change implies that the game is over only when one player has
+more four-in-a-rows than their opponent. To this end, blocks of
+consecutive chips that are longer than four should be treated as
+separate chunks of four. For example, consider a player who has
+achieved five chips in-a-row; such a condition should be treated as
+two instances of four-in-a-row.
 
-#### `placeChip`
+### Tic-Tac-Toe
 
-Chips can be placed in columns zero through six inclusive. Given an
-integer in this range, the chip carried by the current player should
-"fall" to the first open row closest to the boards bottom. Requests
-for places outside of the valid range, or to columns that are full,
-should throw a `GameIndexOutOfBoundsException`. Requests to a game
-that is over should throw a `GameStateException`.
+Tic-Tac-Toe is played on a 3-by-3 grid. Like Connect Four and
+Complica, it is a turn based game in which the first player to lay
+consecutively placed chips wins. In this case, the magic consecutive
+number is three. Different cultures have given this game different
+names -- [Wikipedia](https://en.wikipedia.org/wiki/Tic-tac-toe) gives a
+good overview of what those names are, along with the general rules.
 
-This method should not only place chips on the board, but alter
-players depending on the state of the game. In particular it should
-change the current player and, if necessary, the winning player as
-well.
+The biggest difference between this and the other two games is that
+chips do not "drop" in place. Instead, a placement specification must
+be a 2-tuple specifying the row and column; and the subsequent
+placement must be to that exact location.
 
-#### `getChip`
+## Integration
 
-Return the chip currently placed at a given coordinate. If a player
-were physically sitting at a table viewing an upright Connect Four
-board, the upper left corner would correspond to row zero, column
-zero; while the lower right corner would correspond to row five,
-column six.
+Adding these two games will require you to fill out the two new Java
+files in the `impl.game` package. You are free to add more files to
+this package if you like. These games must be integrated into your
+existing code base using the [template design
+pattern](https://sourcemaking.com/design_patterns/template_method). It
+is probably best if you first add the games without using the pattern,
+then think through the refactorization required for it to be achieved.
 
-#### `getWinningPlayer`
+You may also require alterations to your view. If your view was well
+designed in the previous version, however, those changes should be
+minimal.
 
-Return the player who has been declared the winner of this
-game. Throws a `GameStateException` if the request has been made when
-no winner has been determined.
+## Run
 
-#### `getCurrentPlayer`
+The game to run should be specified at run-time. Specifically, this
+means passing the relevant game to Ant. The following, would execute
+Complica:
 
-Return the current player. If the game is a tie, the return value
-should correspond to the empty chip; it should be the non-empty chip
-otherwise.
+```
+ant console -Dgame=complica
+```
 
-#### `isGameOver`
+When started this way, Ant essentially passes the string to
+`test.system.ConsoleTest`. ConsoleTest has been augmented to recognize
+this string and instantiate the correct Game implementation; see its
+implementation for the universe of recognized values.
 
-The game is over if it is a tie or a winner has been determined.
+## Working with Git
 
-### View
+First, "tag" your current version:
 
-The user should interact with the game through the view via the
-command line. The view observes the game, updating what it shows to
-the user based its observations (notifications). The view maintains an
-[*aggregate*](https://en.wikipedia.org/wiki/Object_composition#Aggregation)
-relationship with the game.
+```bash
+$> git tag -a v1 -m "Homework 1 final"
+$> git push origin v1
+```
 
-#### `render`
+Tagging allows you to "bookmark" a milestone in your projects
+development.
 
-Draw the board on the screen in a manner that resembles a standing
-board. It should be clear which player occupies a given cell.
+Next, [sync your current
+fork](https://help.github.com/articles/syncing-a-fork/) with this
+one. Syncing should update your README and add the new class structure
+to your existing work.
+
+You are free to develop this homework on a new branch. However, for
+grading we will only take into consideration what is on master at the
+deadline.
 
 ## Expectations
 
-### View (30 points)
+### Usability (20 points)
 
-The view must accurately update the visualization of the board and
-give players turns. The system test takes care of announcing the end
-result of the game; which should run as expected, annoucing ties or
-wins. The view and the model should interact entirely via the Java
-Observer infrastructure. Specifically, this means no loops should be
-involved.
+Usability and programmatic aspects of the previous assignment should
+be maintained. That means there should be a single console view that
+is capable of displaying and handling interaction of a specified
+model.
 
-### Model (60 points)
+### Correctness (50 points)
 
-The game must pass a collection of unit tests based on the specified
-behavior. Fractional points will be deducted for each failed test. A
-basic test is provided to get your started. You should at least pass
-this!
+As was the case in the first edition of Board Games, there is a suite
+of tests we have developed that we will use for grading. However, you
+are strongly encouraged to build your own unit tests during
+development. Again, those tests should reside in `src/test/unit/foo`,
+where `foo` is your NetID. Please differentiate tests as follows:
 
-No points will awarded for code that fails to compile during the
-testing phase.
+* Game specific tests should go in files beginning with that games
+  name. For example, ConnectFour test should go in
+  `ConnectFour*Test.java`, where `*` can be whatever name you choose.
+
+* Game agnostic tests should go in `Common*Test.java`
+
+Consider using JUnit [parameterized
+tests](https://github.com/junit-team/junit4/wiki/Parameterized-tests)
+to save time.
+
+The number of points you receive for this aspect will be based on the
+fraction of tests passed. Questions about testing semantics, and thus
+ambiguities to this specification, should be resolved using GitHub
+issues (mark the "assignee" as
+[@jsw7](https://github.abudhabi.nyu.edu/jsw7) and
+[@kqm1](https://github.abudhabi.nyu.edu/jsw7)).
+
+### Design (20 points)
+
+These games should be added using the template design pattern. Your
+code should clearly document how and where this has been done. Note
+that there are multiple places where this pattern can be applied --
+for full credit we will be looking for all of them.
+
 
 ### Practices (10 points)
 
@@ -118,88 +141,3 @@ We continue to expect "good general habits" and good "usage of
 GitHub." Please see the [previous
 homework](https://github.abudhabi.nyu.edu/jsw7/blackjack/tree/hw1#grading)
 for what this entails.
-
-## Testing
-
-The `test` package comes with an overall system test and a series of
-unit tests. You can use the system test for sanity checking, but your
-focus should be the unit tests. There are several standard tests you
-must pass, but you should also create your own tests for areas that
-might not be covered.
-
-Within the test directory, there is a sub-directory for unit tests
-(src/tests/unit). This directory is meant to contain directories in
-which individuals can house their unit tests. Notice that by default
-there is a single directory for
-[jsw7](https://github.abudhabi.nyu.edu/jsw7):
-
-```
-$> ls src/test/unit/
-jsw7
-```
-
-To add your own tests, create a directory in this location
-corresponding to your NetID. Populate that directory with your
-tests. For example, if [Kobe
-Bryant](http://www.nba.com/lakers/news/8_2_24.html) were in our class,
-he would do the following:
-
-```
-$> cd src/test/unit/
-$> mkdir kb24
-$> cat <<BUZZER > kb24/ConnectFourGameTest.java
-> package test.unit.kb24
-> public class ConnectFourGameTest {}
-> BUZZER
-$> git add kb24
-```
-
-If you add the directory (and all Java files it holds) to your
-repository, we will consider these tests when grading. There are no
-unit tests for the view (`ConnectFourView`) nor are you required to
-create any (although, feel free to if you're so inclined).
-
-## Build/test/run
-
-You can use whatever you like for development. If you choose to remain
-in the command line, the [ant](http://ant.apache.org) build script
-recognizes the following commands:
-
-Command | Description
---- | ---
-clean   | Removes extraneous directories; most notably, existing class files. Use this command if Java's giving you strange errors.
-compile | Compiles all Java files under src, except the unit tests.
-compile-tests | Compiles files in `impl.game` and `test.unit`.
-test    | Engages JUnit to run the unit tests.
-console | Runs the full game.
-
-## Adding files
-
-It is okay to add additional Java files as you deem necessary. Those
-files should be reserved for impl; most likely impl/game.
-
-This is important because of testing: the only methods that can be
-tested are those defined in the API. As such, although we checkout
-your entire repository, when we test we move your src/impl into a
-stock directory that contains a default api and a test/unit with our
-suite of tests (which may including yours). Thus, if you add files to
-any other location, your code will likely not even build during our
-testing phase.
-
-Further, if the test(s) you provide test things not in the standard
-API, nor specified explicitly herein, those tests will be ignored. So
-while it's good practice to test everything, know that when it comes
-to our "universal" test suite, we can only take into account things
-that are universal.
-
-## Workflow
-
-It is expected that you will use GitHub religiously. You should fork
-this project, then branch/commit/push freely.
-
-See the assignment listing in NYU Classes for the due date. We will
-grade the code that is on your master branch at the exact deadline. We
-are willing to consider material on your master branch after the
-deadline, however, doing so will incur a 10% penalty for 24 hours
-after the deadine, and a 30% penalty thereafter. There are no
-extensions.
