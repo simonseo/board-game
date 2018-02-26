@@ -85,9 +85,7 @@ public class ConnectFourGameTest {
     }
 
     @Test
-    public void testNextPlayerSetAfterPlacedDisk()
-        throws GameStateException,
-               GameIndexOutOfBoundsException {
+    public void testNextPlayerSetAfterPlacedDisk() throws GameStateException {
         Chip firstPlayer = game.getCurrentPlayer();
         game.placeChip(0, 0);
         Chip secondPlayer = game.getCurrentPlayer();
@@ -97,15 +95,12 @@ public class ConnectFourGameTest {
 
     @Test(expected = GameIndexOutOfBoundsException.class)
     public void testDisksCannotBePlacedOutOfBounds()
-        throws GameStateException,
-               GameIndexOutOfBoundsException {
+        throws GameStateException {
         game.placeChip(0, game.getColumns() + 1);
     }
 
     @Test(expected = GameIndexOutOfBoundsException.class)
-    public void testDisksCannotBePlacedNegatively()
-        throws GameStateException,
-               GameIndexOutOfBoundsException {
+    public void testDisksCannotBePlacedNegatively() throws GameStateException {
         game.placeChip(0, -1);
     }
 
