@@ -95,6 +95,7 @@ public class Console extends View {
 		 */
 		int r = game.getRows();
 		int c = game.getColumns();
+		System.out.println("\n");
 		for (int j = 0; j < c; j++) {
 			System.out.print(" "+j);
 		}

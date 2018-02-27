@@ -13,8 +13,8 @@ import impl.game.TicTacToe;
 public class Controller {
 	private Scanner scan;
 	private Game game;
-	private boolean requireRow;
-	private boolean requireColumn;
+	private final boolean requireRow;
+	private final boolean requireColumn;
 	
 	public Controller(Game game) {
 		this.scan = new Scanner(System.in);
@@ -30,11 +30,11 @@ public class Controller {
 			try {
 				int row = 0, col = 0;
 				if (this.requireRow) {
-					System.out.print("Choose a row: ");
+					System.out.println("Choose a row: ");
 					row = scan.nextInt();
 				}
 				if (this.requireColumn) {
-					System.out.print("Choose a column: ");
+					System.out.println("Choose a column: ");
 					col = scan.nextInt();
 				}
 				game.placeChip(row, col);
