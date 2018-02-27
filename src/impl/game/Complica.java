@@ -1,8 +1,8 @@
 package impl.game;
 
-import java.util.InputMismatchException;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Random;
-import java.util.Scanner;
 
 import api.Chip;
 import api.Game;
@@ -16,14 +16,13 @@ public class Complica extends Game {
 	private Chip currentPlayer;
 	private Chip winner;
 	private boolean gameIsOver;
-	private Scanner scan;
 	
 	
 	public Complica() {
 		/*
 		 * Constructor initiates variables to the first 
 		 */
-		this.rows = 7;
+		this.rows = 4;
 		this.columns = 4;
 		this.currentPlayer = new Chip[]{Chip.BLUE, Chip.RED}[new Random().nextInt(2)];
 		this.winner = null;
@@ -34,44 +33,8 @@ public class Complica extends Game {
 				board[i][j] = Chip.EMPTY;
 			}
 		}
-		this.scan = new Scanner(System.in);
 	}
 	
-	public void start() {
-		this.round();
-	}
-	
-	public void round() {
-		assert !this.isGameOver();
-		
-		Chip p = this.getCurrentPlayer();
-		String ps = (p.equals(Chip.BLUE)) ? "Blue" : 
-					(p.equals(Chip.RED)) ? "Red" : "Empty";
-		System.out.println("It is " + ps + " Player's turn. Choose a column: ");
-		
-		// receive user input of their desire column and place chip in board
-		try {
-			int col = scan.nextInt();
-			this.placeChip(0, col);
-		} catch (InputMismatchException e) {
-			System.out.println("Error: Wrong type of input");
-			this.scan.skip("[^0-9]");
-			e.printStackTrace();
-		} catch (GameIndexOutOfBoundsException | GameStateException e) {
-			e.printStackTrace();
-		}
-		
-		// check if game is over. don't call round if game over
-		if (!this.isGameOver()) {
-			this.notifyObservers("Next Round");
-			this.round();
-		} else {
-			this.notifyObservers("Game Over");
-			this.scan.close();
-		}
-	}
-	
-
 	@Override
 	public int getRows() {
 		return this.rows;
@@ -148,18 +111,29 @@ public class Complica extends Game {
 		};
 
 		Chip p = this.getCurrentPlayer();
-		board[row][col] = p;
-		if (this.checkWin(p, row, col)) {
-			this.winner = p;
+		this._placeChip(row, col, p);
+		this.setChanged();
+		this.winner = this.findWinner();
+		if (!this.winner.equals(Chip.EMPTY)) {
 			this.gameIsOver = true;
+			this.switchPlayer();
 			this.setChanged();
-		} else if (this.boardIsFull()) {
-			this.winner = Chip.EMPTY;
-			this.gameIsOver = true;
+			this.notifyObservers("Game Over");
+		} else {
+			this.switchPlayer();
 			this.setChanged();
+			this.notifyObservers("Next Round");
 		}
-		this.switchPlayer();
-		
+	}
+
+	private void _placeChip(int row, int col, Chip p) {
+		if (row < 0 || row > this.getRows()-1 || 
+			col < 0 || col > this.getColumns()-1) {
+			System.out.println("Error: placeChip was given row!=0 or non-existent column");
+			throw new GameIndexOutOfBoundsException(row, col);
+		}
+		assert p != null;
+		this.board[row][col] = p;
 	}
 
 	private int getPlaceableRow(int col) {
@@ -174,27 +148,72 @@ public class Complica extends Game {
 				return row;
 			}
 		}
-		return -1;
+		this.shiftColumn(col, 1);
+		return 0;
 	}
 
-	private boolean checkWin(Chip p, int row, int col) {
-		// Awesome for-loops -- can we call all logic algorithm? -- that checks if player wins
-		// Be sure to check out my diagonal check. It's beautiful.
-//		int count;
+	private void shiftColumn(int col, int offset) {
+		/*
+		 * Shifts given column by offset amount.
+		 * offset can be any int
+		 */
+		// TODO Test this
+		assert col >= 0 && col < this.getColumns();
+		Queue<Chip> fifo = new LinkedList<Chip>();
+		int d = (offset >= 0) ? 1 : -1;
+		int i = (offset >= 0) ? 0 : this.getRows()-1;
+		for (; Math.abs(i) < this.getRows(); i += d) {
+			fifo.add(this.getChip(i, col));
+			Chip c = (Math.abs(i) < Math.abs(offset)) ? Chip.EMPTY : fifo.poll();
+			this._placeChip(i, col, c);
+		}
+	}
 
+	private Chip findWinner() {
+		// Finds the chip that has the most inarows
+		Chip winner = Chip.EMPTY;
+		int maxInarows = 0;
+
+		// Find chip that has maximum number of inarows.
+		for (Chip p : Chip.values()) {
+			if (!p.equals(Chip.EMPTY)) {
+				int in_a_row_count = this.countInarows(p);
+				if (in_a_row_count > maxInarows) {
+					maxInarows = in_a_row_count;
+					winner = p;
+				}
+			}
+		}
+		
+		// if there are any other chip that has the same (or more) number of inarows, nobody is a winner.
+		for (Chip p : Chip.values()) {
+			if (!p.equals(Chip.EMPTY) && !p.equals(winner)) {
+				if (this.countInarows(p) >= maxInarows) {
+					return Chip.EMPTY;
+				}
+			}
+		}
+		return winner;
+	}
+
+	private int countInarows(Chip p) {
+		int in_a_row_count = 0;
 		//Horizontal check
-		for (int c = 0, count = 0; c < this.getColumns(); c++) {
-			count = (this.getChip(row, c).equals(p)) ? count+1 : 0;
-			if (count >= this.CONNECT) return true;
+		for (int r = 0; r < this.getRows(); r++) {
+			for (int c = 0, count = 0; c < this.getColumns(); c++) {
+				count = (this.getChip(r, c).equals(p)) ? count+1 : 0;
+				if (count >= this.CONNECT) in_a_row_count += 1;
+			}
 		}
 		
 		//Vertical check	
-		for (int r = 0, count = 0; r < this.getRows(); r++) {
-			count = (this.getChip(r, col).equals(p)) ? count+1 : 0;
-			if (count >= this.CONNECT) return true;
+		for (int c = 0; c < this.getColumns(); c++) {
+			for (int r = 0, count = 0; r < this.getRows(); r++) {
+				count = (this.getChip(r, c).equals(p)) ? count+1 : 0;
+				if (count >= this.CONNECT) in_a_row_count += 1;
+			}
 		}
-		
-		
+
 		int R = this.getRows(); // number of rows
 		int C = this.getColumns(); // number of columns
 		int D = R + C - 1; // total number of diagonals
@@ -209,10 +228,9 @@ public class Complica extends Game {
 			n = Math.min(Math.min(R, C), Math.min(d+1, D-d)); // length of diagonal
 			for (int i = 0, count = 0; i < n; i++) {
 				count = (this.getChip(X+i, Y+i).equals(p)) ? count+1 : 0; // reset counter if we see something different
-				if (count >= this.CONNECT) return true; // stop as soon as we see the 4th one
+				if (count >= this.CONNECT) in_a_row_count += 1; // stop as soon as we see the 4th one
 			}
 		}
-		
 		// Reverse diagonal check
 		for (int d = this.CONNECT-1; d < D-(this.CONNECT-1); d++) { 
 			X = Math.max(0, R-(d+1));
@@ -220,23 +238,10 @@ public class Complica extends Game {
 			n = Math.min(Math.min(R, C), Math.min(d+1, D-d));
 			for (int i = 0, count = 0; i < n; i++) {
 				count = (this.getChip(X+i, Y-i).equals(p)) ? count+1 : 0;
-				if (count >= this.CONNECT) return true;
+				if (count >= this.CONNECT) in_a_row_count += 1;
 			}
 		}
- 
-		return false;
-	}
-
-	private boolean boardIsFull() {
-		/*
-		 * Checks if board is full (true) or has any empty space (false)
-		 */
-		for (int col = 0; col < this.getColumns(); col++) {
-			if (this.getPlaceableRow(col) >= 0) {
-				return false;
-			}
-		}
-		return true;
+		return in_a_row_count;
 	}
 
 	@Override
