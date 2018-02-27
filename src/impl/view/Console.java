@@ -1,14 +1,14 @@
 package impl.view;
 
 import java.util.Observable;
-
 import api.Chip;
 import api.Game;
 import api.View;
-import impl.game.ConnectFour;
+import impl.controller.Controller;
 
 public class Console extends View {
 	private Game game;
+	private Controller control;
 	private enum marker {
 		EMPTY {
 			public String toString() {
@@ -48,6 +48,7 @@ public class Console extends View {
 	public Console(Game game) {
 		this.game = game;
 		this.game.addObserver(this);
+		this.control = new Controller(this.game);
 	}
 
 	@Override
@@ -65,12 +66,12 @@ public class Console extends View {
 		 */
 		this.render(this.game);
 		
-		if (arg == null) {
-			// Assumably start of game
-			((ConnectFour) this.game).start();
-		} else if (arg.toString().equals("Next Round")) {
+		if (arg == null || arg.toString().equals("Next Round")) {
 			// Assumably middle of game
-			System.out.println(arg.toString());
+			if (arg != null) System.out.println(arg.toString());
+			Chip p = game.getCurrentPlayer();
+			System.out.println("It is " + p + " Player's turn.");
+			control.round();
 		} else if (arg.toString().equals("Game Over")) {
 			// Assumably end of game
 			System.out.println(arg.toString());

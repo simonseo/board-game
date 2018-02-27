@@ -1,8 +1,6 @@
 package impl.game;
 
-import java.util.InputMismatchException;
 import java.util.Random;
-import java.util.Scanner;
 
 import api.Chip;
 import api.Game;
@@ -16,7 +14,7 @@ public class ConnectFour extends Game {
 	private Chip currentPlayer;
 	private Chip winner;
 	private boolean gameIsOver;
-	private Scanner scan;
+	
 	
 	
 	public ConnectFour() {
@@ -34,44 +32,8 @@ public class ConnectFour extends Game {
 				board[i][j] = Chip.EMPTY;
 			}
 		}
-		this.scan = new Scanner(System.in);
 	}
 	
-	public void start() {
-		this.round();
-	}
-	
-	public void round() {
-		assert !this.isGameOver();
-		
-		Chip p = this.getCurrentPlayer();
-		String ps = (p.equals(Chip.BLUE)) ? "Blue" : 
-					(p.equals(Chip.RED)) ? "Red" : "Empty";
-		System.out.println("It is " + ps + " Player's turn. Choose a column: ");
-		
-		// receive user input of their desire column and place chip in board
-		try {
-			int col = scan.nextInt();
-			this.placeChip(0, col);
-		} catch (InputMismatchException e) {
-			System.out.println("Error: Wrong type of input");
-			this.scan.skip("[^0-9]");
-			e.printStackTrace();
-		} catch (GameIndexOutOfBoundsException | GameStateException e) {
-			e.printStackTrace();
-		}
-		
-		// check if game is over. don't call round if game over
-		if (!this.isGameOver()) {
-			this.notifyObservers("Next Round");
-			this.round();
-		} else {
-			this.notifyObservers("Game Over");
-			this.scan.close();
-		}
-	}
-	
-
 	@Override
 	public int getRows() {
 		return this.rows;
@@ -152,13 +114,20 @@ public class ConnectFour extends Game {
 		if (this.checkWin(p, row, col)) {
 			this.winner = p;
 			this.gameIsOver = true;
+			this.switchPlayer();
 			this.setChanged();
+			this.notifyObservers("Game Over");
 		} else if (this.boardIsFull()) {
 			this.winner = Chip.EMPTY;
 			this.gameIsOver = true;
+			this.switchPlayer();
 			this.setChanged();
+			this.notifyObservers("Game Over");
+		} else {
+			this.switchPlayer();
+			this.setChanged();
+			this.notifyObservers("Next Round");
 		}
-		this.switchPlayer();
 		
 	}
 
