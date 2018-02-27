@@ -43,8 +43,14 @@ public class Controller {
 				System.out.println("Error: Wrong type of input");
 				this.scan.skip("[^0-9]");
 				e.printStackTrace();
-			} catch (GameIndexOutOfBoundsException | GameStateException e) {
+			} catch (GameIndexOutOfBoundsException e) {
+				System.out.println("Error: That place doesn't exist. Try another one");
+			} catch (GameStateException e) {
+				System.out.println("Error: Check that the game is running");
 				e.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw e;
 			}
 		}
 	}
